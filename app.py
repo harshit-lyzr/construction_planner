@@ -4,10 +4,14 @@ from PIL import Image
 import utils
 import base64
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+api_key = os.getenv("OPENAI_API_KEY")
 
 st.set_page_config(
     page_title="Construction Planner",
-    layout="centered",  # or "wide"
+    layout="wide",  # or "wide"
     initial_sidebar_state="auto",
     page_icon="lyzr-logo-cut.png",
 )
@@ -27,16 +31,9 @@ image = Image.open("lyzr-logo.png")
 st.image(image, width=150)
 
 # App title and introduction
-st.title("Construction Planner👷‍")
-st.sidebar.markdown("## Welcome to the Construction Planner!")
-st.sidebar.markdown("In this App you need to Upload Your Construction map and It can generate Construction planning and Additional Consideration Like Material Management,Labor Management or etc.")
 
-api = st.sidebar.text_input("Enter Your OPENAI API KEY HERE",type="password")
 
-if api:
-        openai_4o_model = GPTVISION(api_key=api,parameters={})
-else:
-        st.sidebar.error("Please Enter Your OPENAI API KEY")
+openai_4o_model = GPTVISION(api_key=api_key,parameters={})
 
 data = "data"
 os.makedirs(data, exist_ok=True)
@@ -58,15 +55,29 @@ Weekly Plans:
 Monthly Plans:
 Additional Consideration:
 """
+def main():
+    page = st.sidebar.radio("Navigation", ["Home", "Upload"])
 
-uploaded_files = st.file_uploader("Upload Your Construction Map", type=['png', 'jpg'])
-if uploaded_files is not None:
-        st.success(f"File uploaded: {uploaded_files.name}")
-        file_path = utils.save_uploaded_file(uploaded_files)
-        if file_path is not None:
-                encoded_image = encode_image(file_path)
-                planning = openai_4o_model.generate_text(prompt=prompt, image_url=encoded_image)
-                st.markdown(planning)
+    if page == "Home":
+        st.title("Construction Planner👷‍")
+        st.markdown("## Welcome to the Construction Planner!")
+        st.markdown(
+            "In this App you need to Upload Your Construction map and It can generate Construction planning and Additional Consideration Like Material Management,Labor Management or etc.")
+        st.markdown("### Note: Upload Better Image with Dimensions and Other Details for better result. ")
+        st.markdown("## Sample Image")
+        st.image("302182976_422201556643778_2409092908657518815_n.jpg")
 
+    if page == "Upload":
+        uploaded_files = st.file_uploader("Upload Your Construction Map", type=['png', 'jpg'])
+        if uploaded_files is not None:
+                st.success(f"File uploaded: {uploaded_files.name}")
+                st.image(uploaded_files)
+                file_path = utils.save_uploaded_file(uploaded_files)
+                if file_path is not None:
+                        encoded_image = encode_image(file_path)
+                        planning = openai_4o_model.generate_text(prompt=prompt, image_url=encoded_image)
+                        st.markdown(planning)
 
+if __name__ == "__main__":
+    main()
 
