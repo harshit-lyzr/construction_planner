@@ -30,7 +30,7 @@ st.markdown(
 image = Image.open("lyzr-logo.png")
 st.image(image, width=150)
 
-# App title and introduction
+st.title("Construction Planner👷‍")
 
 
 openai_4o_model = GPTVISION(api_key=api_key,parameters={})
@@ -56,24 +56,41 @@ Monthly Plans:
 Additional Consideration:
 """
 def main():
-    page = st.sidebar.radio("Navigation", ["Home", "Upload"])
+    page = st.sidebar.radio("Navigation", ["Home", "Default", "Upload"])
 
     if page == "Home":
-        st.title("Construction Planner👷‍")
         st.markdown("## Welcome to the Construction Planner!")
         st.markdown(
             "In this App you need to Upload Your Construction map and It can generate Construction planning and Additional Consideration Like Material Management,Labor Management or etc.")
+        st.markdown(f"""
+                **How to get started**
+                  \n-Upload an image
+                  \n-Generate Construction Planning for your Construction Map
+                its that easy!
+                """)
+        st.markdown(f"""
+                ****How it works:****
+                \n**1. Upload Construction Map:** Users upload a construction map in either PNG or JPG format. This map should contain detailed information, including dimensions and relevant construction details, for the best results.
+                \n**2. Generate Planning:** The AI model uses the extracted details to generate a detailed planning outline, including weekly and monthly plans. It also considers additional aspects like material management, labor management, quality control, and budget management.
+                \n**3. Display Results:** The generated construction plan is displayed on the application interface, providing users with a structured and comprehensive plan to follow.
+                """)
         st.markdown("### Note: Upload Better Image with Dimensions and Other Details for better result. ")
-        st.markdown("## Sample Image")
-        st.image("302182976_422201556643778_2409092908657518815_n.jpg")
+
+    if page == "Default":
+        st.sidebar.image("302182976_422201556643778_2409092908657518815_n.jpg")
+        with st.spinner("Generating Construction Planning...."):
+            encoded_image = encode_image("302182976_422201556643778_2409092908657518815_n.jpg")
+            planning = openai_4o_model.generate_text(prompt=prompt, image_url=encoded_image)
+            st.markdown(planning)
 
     if page == "Upload":
         uploaded_files = st.file_uploader("Upload Your Construction Map", type=['png', 'jpg'])
         if uploaded_files is not None:
                 st.success(f"File uploaded: {uploaded_files.name}")
-                st.image(uploaded_files)
+                st.sidebar.image(uploaded_files)
                 file_path = utils.save_uploaded_file(uploaded_files)
                 if file_path is not None:
+                    with st.spinner("Generating Construction Planning...."):
                         encoded_image = encode_image(file_path)
                         planning = openai_4o_model.generate_text(prompt=prompt, image_url=encoded_image)
                         st.markdown(planning)
